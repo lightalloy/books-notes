@@ -1,29 +1,37 @@
-Книга о монолитных приложениях, которые разрастаются до 200 моделей. И о том, как с этим жить.
+# Notes from "Growing rails applications in practice"
 
 # introduction
 In this book you'll find techniques to scale large, monolithic Rails applications, learn how to use discipline, consistency and code organization to make your code grow more gently.
 Not revolutionary patterns or new gems, but using tools you already know the smarter way
 # New rules for Rails
-# Beautiful controllers
+## Beautiful controllers
 Controllers are not fun (( 
 Lots of code, not sure where to place code
 Requires complex environment, hard to test.
-Few ror guidelines.
-So every controller is a bit different
+Lack of clear ror guidelines.
+It leads to the situation where every controller is a bit different.
 ## The case for consistent controller design
-Need to have standards for controllers
-Speed up dev, better team work
-5. Normalizing user interactions
-Normalize every user interaction to crud, even if doesn't look like
-6. A better controller implementation
+A good approach is to use a standard controller design for every single user interaction.
+Having a default design approach speeds up development, leads to the better team work.
+## Normalizing user interactions
+Normalize every user interaction to crud, even if doesn't look like.
+## A better controller implementation
 Short, dry, minimum glue code
-7. Why have controllers at all?
-Security (auth, auth)
-Parse, whitelist parameters, loading and instantiating a model
-Decide which view to render
-No heavy lifting
+- The controller actions are delegating most of their work to helper methods like load_note or build_note.
+- There is a private method note_scope which is used by all member action with a given ID and index method.
+- private method #note_params for attributes
+- every controller action reads or changes a single model
+- you might want to use a custom model for forms that are complicated or do not persist to a database
+
+
+
+## Why have controllers at all?
+- Security (auth, auth)
+- Parse, whitelist parameters, loading and instantiating a model
+- Decide which view to render
+- No heavy lifting
 Inherited resources and such gems: don't use for large apps - confusing configuration, too much magic
-    IV Relearning ActiveRecord
+# Relearning ActiveRecord
     Activerecord is useful to validate data, form roundtrips, lifecycle callbacks
 error handling and input validation
 but it's easy to shoot yourself in the foot.
