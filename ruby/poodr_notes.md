@@ -30,7 +30,7 @@ Classes with Single Responsibility are easy to reuse
 
 Determine if class has SR:
 - interrogate it (like class is sentient)
-- describe what class does in 1 sentence (if there are 'and' or 'or' - class has multiple responsibilities)
+- describe what class does in 1 sentence (if there are 'and' or 'or' - class has multiple responsibiliкties)
 
 Do not redesign unless the cost of doing nothing is higher than the cost of redisign
 
@@ -937,7 +937,7 @@ class StubbedBike < Bicycle
     0
   end
   def local_spares
-    {saddle: 'painful'}
+    { saddle: 'painful' }
   end
 end
 ```

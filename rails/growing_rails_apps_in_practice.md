@@ -22,20 +22,18 @@ Short, dry, minimum glue code
 - private method #note_params for attributes
 - every controller action reads or changes a single model
 - you might want to use a custom model for forms that are complicated or do not persist to a database
-
-
-
 ## Why have controllers at all?
 - Security (auth, auth)
 - Parse, whitelist parameters, loading and instantiating a model
 - Decide which view to render
 - No heavy lifting
 Inherited resources and such gems: don't use for large apps - confusing configuration, too much magic
+
 # Relearning ActiveRecord
-    Activerecord is useful to validate data, form roundtrips, lifecycle callbacks
+Activerecord is useful to validate data, form roundtrips, lifecycle callbacks
 error handling and input validation
 but it's easy to shoot yourself in the foot.
-8. Understanding the ActiveRecord lifecycle
+## Understanding the ActiveRecord lifecycle
 Ar requires your models to be written in a certain way
 "Infinite protocol" of AR - "objects on rails"
 Approaches:
@@ -46,7 +44,7 @@ Enforce the integrity of the validations and callbacks. But remember about updat
 Too many callbacks => look in 'Dealing with fat models'
 9. The true API of ActiveRecord models
   using any API methods:
-   1)  instantiate
+   1) instantiate
    2) manipulate
    3) manipulating puts object in dirty state, not saved
    4) after validations: all changes are commited to db in a single transaction
@@ -81,27 +79,27 @@ Any controller:
 # Creating a system for growth
 # Dealing with fat models
 Problems: afraid of calling unneeded callback, too much callbacks and validations, different UI requires different support code from your model
-13. Why models grow fat
+## Why models grow fat
 More and more purposes, lots of use cases
 Different forms need different validations, fear of unneeded callbacks triggering, hard to test because of side-effects
-14. The case of the missing classes
+## The case of the missing classes
 Code never goes away, you'll need to put it into a place or it'll infest an existing class
-15. Getting into a habit of organizing
+## Getting into a habit of organizing
 Instead of looking for existing AR class first look for new classes
-VIII A home for interaction-specific code
+# A home for interaction-specific code
 Reduce fat model to  slim core model. Create multiple interaction-specific form models.
 Model: minimum of validations, associations, universal methods.
 Not: validations for specific views, virtual attributes, callbacks for particular case, auth, helpers for views and rendering
-16. A modest approach to form models
+## A modest approach to form models
 Problems with gems for form objects, presenters, etc
 Vanilla inheritance for form objects
 Use::Assign up < User
-17. More convenience for form models
+## More convenience for form models
 Tweaks from ActiveType + inheritance
 User::AsSignUp  < ActiveType:: Record [User]
-IX Extracting service objects
+## Extracting service objects
 In a fat model there is a lot of code that doesn't need to be tied to AR. Such code should be extracted into poros. Slim down: walk through the code and find what code can be extracted into service objects.
-18. Example
+### Example
 Move Note#search and connected methods to Note::Search
 Aggressively look for opportunities to extract into service objects
 19. Did we just move code around?
@@ -112,8 +110,8 @@ app/models/invoice.rb
 app/models/invoice/item.rb (Invoice::Item, belongs_to :invoice)
 app/models/invoice/export.rb
 ...
-20. Real-world example
-21. Use the same structure everywhere
+### Real-world example
+## Use the same structure everywhere
 Make sure namespacing is also adopted by all the other places that are organized by model.
 (helpers, controllers, views)
 app/views/projects/index.html.erb
