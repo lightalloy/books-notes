@@ -234,10 +234,87 @@ Only third idea is independent of the current implementation.
 DRY is good idea for code, but less useful in tests.
 
 # 3. Unearthing Concepts
+Shameless Green is simple and understandable, but it's also kind of procedural and contains duplication.
+It's good enough until the change is needed.
 
+## 3.1. Listening to Change
+The code is expensive, so improving code based only on aesthetic purposes may be not the best use of your precious time.
+Changes should be driven by requirements.
+A new requirement tells you how the code should be changed, changes impose higher standarts.
+New requirement: output '1 six-pack' in each place where it currently sais '6 bottles'.
+If we just add branches to case statement, it'll have 6 branches. This is unacceptable, so we should improve the code.
 
-2 - (76) - 88
-3 - 89-120
+## 3.2. Starting With the Open/Closed Principle
+Open/Closed - open for extension and closed for modification.
+'O' in SOLID
+Single Responsibility - methods of the class should be cohesive around a single purpose
+Open/Closed - open for extension. closed for modification.
+Liskov Substitution - subclasses should be substitutable for their superclasses.
+Interface Segregation - objects should be forced to depend on methods they don't use
+Dependency Inversion - depend on abstractions, not concretions
+
+Open/Closed - you should not conflate the process of refactoring with adding new features
+New requirement => first rearrange your code such that it'll be open to the new feature, then add the new code.
+Our code in not open for the new requirement, so we should refactor it.
+But it's hard to figure out how to do it.
+If you don't know how to make the code open, remove the easiest to fix/best understood code smell.
+
+## 3.3. Recognizing Code Smells
+The easiest way to unearth the code smells is to make a list of things you dislike about the code.
+
+## 3.4. Identifying the Best Point of Attack
+Our code contains the switch statement smell and duplicated code.
+Duplicated Code is the easiest.
+Removing duplication is not directly connected with the new requirement. The plan is to nibble away, one code smell at a time, in faith that the path to openness will be revealed.
+
+## 3.5. Refactoring Systematically
+Safe refactoring relies upon tests.
+If tests fail because you’ve broken the code, undo the last change, make a better one and proceed.
+If you rearrange code without changing behaviour but tests fail, the tests are flawed (e.g. tests know about implementation). In this situation you should improve the tests first.
+
+## 3.6. Following the Flocking Rules
+Current task - removing the duplication.
+### Flocking Rules
+1) Select the things that are most alike.
+2) Find the smallest difference between them.
+3) Make the simplest change that will remove that difference.
+
+Steps for code change:
+- parse the new code
+- parse and execute it
+- parse, execute and use the result
+- delete unused code
+
+With these steps you'll get very precise error messages when something goes wrong. As you gain experience you'll take larger steps.
+
+For now:
+- change only 1 line at a time
+- run the tests after every change
+- if the tests fail undo and make a better change
+
+Birds flocking is done by 3 simple rules:
+1) Alignment - Steer towards the average heading of neighbors
+2) Separation - Don’t get too close to a neighbor
+3) Cohesion - Steer towards the average position of the flock
+
+## 3.7. Converging on Abstractions
+The Flocking rules are atomic and general, they don't yet inspire confidence.
+### 3.7.1 Focusing on Difference
+When examining complicated problems, the eye is first drawn towards sameness.
+Sameness is easier to identify, but difference is more useful, cause it has more meaning.
+DRYing the difference has more value.
+The difference represents an abstraction.
+You don't have to identify abstraction in advance, just follow the rules and the abstraction will appear.
+
+Programmers usually decide a solution and implement it, the next code may be surprising.
+Solution crafted by intention (usual way) => taking many small, iterative steps, resulting in solution, discovered by refactoring.
+
+Back to the code:
+2 case and else case are most alike, the only real difference is the word "bottle" versus the word "bottles."
+
+### 3.7.2. Simplifying Hard Problems
+
+3 - (105)-120
 4 - 122-170
 5 - 170-222
 6 - 222-280
