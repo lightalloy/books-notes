@@ -313,8 +313,64 @@ Back to the code:
 2 case and else case are most alike, the only real difference is the word "bottle" versus the word "bottles."
 
 ### 3.7.2. Simplifying Hard Problems
+Now we need to make the most alike strings identical.
+It's important to focus on this specific goal, go by horizontal path.
+The most difficult parts are the most interesting, but sometimes solving easy problems first transmute hard problems into easy ones.
+Next step: replace hard-coded numbers.
+Now the only difference is bottle vs bottles.
 
-3 - (105)-120
+### 3.7.3. Naming Concepts
+It's time to decide what bottle/bottles mean in the context of the song.
+The name of the thing should be one level of abstraction higher than the thing itself.
+'Unit' is too general, not in the language of the domain.
+It may be useful to think of other things that would also be in the same category.
+E.g. the container, which is the good name.
+
+### 3.7.4. Making Methodical Transformations
+It's tempting to make all changes in one step.
+But making a slew of simultaneous changes is not refactoring — it’s rehacktoring. In real world you may end up with the ocean of red, then try to fix them, discard all of them and start anew.
+It's better to make a series of tiny changes and run tests after each.
+If tests fail, you'll know the exact change that caused a failure.
+If the tests pass, the code still works, even when the refactoring in partially complete.
+
+The steps guided by flocking rules:
+- create an empty container method.
+- container returns 'bottles'
+- calling container in the else branch
+
+Container should eventually receive an argument, but if we just add it, there will be ArgumentError: wrong number of arguments.
+Real applications can have similar probles but with 10-100-1000 callers instead of one.
+
+### 3.7.5. Refactoring Gradually
+A strategy not to edit all callers simultaniously:
+Container With Defaulted Argument:
+'''
+def container(number=:FIXME)
+  if number == 1
+    'bottle'
+  else
+    'bottles'
+  end
+end
+'''
+Once the refactor is complete, the default should be removed.
+Note, that this change is multiline, but it could be represented in single a line form.
+For now we'll keep it this way.
+Next steps:
+- really pass the argument in the else branch
+- pass the argument in the 2 branch
+- remove FIXME
+- remove the 2 branch - now 2 and else cases are identical
+
+We've done 15 steps, 12 of them required changes in code.
+This way may seem very slow, but with practice it becomes very fast.
+The time is also recouped by avoiding lengthy debugging sessions.
+You can later combine steps if circumstances allow.
+
+# 4. Practicing Horizontal Refactoring
+
+
+
 4 - 122-170
 5 - 170-222
 6 - 222-280
