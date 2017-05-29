@@ -368,9 +368,151 @@ The time is also recouped by avoiding lengthy debugging sessions.
 You can later combine steps if circumstances allow.
 
 # 4. Practicing Horizontal Refactoring
+Let's iteratively apply the Flocking Rules to get a more abstract sample to produce any verse.
+
+## 4.1. Replacing Difference With Sameness
+Next: the 1 and else cases are most alike.
+
+Modifying first and second lines of these 2 branches:
+- replacing hard-coded 1 with number
+- bottle vs bottles => container(number)
+
+## 4.2. Equivocating About Names
+Third line: difference 'it' vs 'one'.
+Finding the good name for such fuzzy concept is hard. 'thing' is broad and 'it_or_one' is too narrow.
+Let's choose name 'pronoun' by now.
+Steps:
+- create empty pronoun method
+- alter pronoun to return 'one'
+- replace 'one' with pronoun
+- add defaulted value to pronoun (FIXME)
+- add conditional
+- pass the argument to pronoun
+- alter the pronoun calls to use argument
+- remove default value
+
+## 4.3. Deriving Names From Responsibilities
+Next difference: last line in 1 and else cases: 'no more bottles' vs "#{number-1} #{container(number-1)}"
+- replace 'bottles' with container(number-1)
+- 'no more' vs #{number-1}
+
+We code name this concept 'remainder', but the 0 case also starts with 'no more', so we'll choose 'quantity'.
+
+But that's not a general licence to think ahead at such points.
+When creating the abstraction, think of your current goal.
+First choose the responsibility, then search for a good name which reflects this responsibility.
+
+## 4.4. Choosing Meaningful Defaults
+:FIXME default is helpful, but won't work in every case.
+- creating quantity method, returning 'no more'
+- calling method in 1 case
+- add conditional to the quantity method (number == 0 ? 'no_more' : number)
+=>
+tests fail (FIXME bottles of beer on the wall)
+FIXME default works only when you want to execute the false branch, for the true branch we need a more specific default.
+- reverting to the prev step
+- adding 0 as default
+- pass number-1 as an argument in the 1 branch
+- use quantity in the else case
+- the default can be removed
+- send container instead of bottles in 1 branch
+The 1 branch can be deleted.
+
+## 4.5. Seeking Stable Landing Points
+3 new concepts (quantity, pronoun, container) were defined.
+Each of them has a single responsibility, are of identical shape.
+It's the result of following specific rules.
+If you follow the rules of refactoring, you'll quickly arrive at stable points.
+The consistency enables the next refactoring.
+
+## 4.6. Obeying the Liskov Substitution Principle
+We have 2 remaining branches.
+Let's find the next smallest difference.
+It's 'No more' vs number. It looks like the quantity concept, but it would return the lowercase 'no more' and broke the tests. So let's replace 'no more' with quantity(number).capitalize in the 0 case
+If we replace the same thing in the else branch, the tests will fail with NoMethodError.
+Review the quantity method: the true branch returns a String and the false branch returns Integer.
+You may want to change the quantiry method, but let's firstS explicitly call to_s for both results of quantity method, that fixes the tests.
+### Liskov Substitution Principle
+The official definition is 'the subtypes should be substitutable for their supertypes'
+But the LSP also applies to duck types - they should be substitutable for each other.
+Liskov prohibits you from doing anything that would force the sender of the message to test the result of this message in order to know how to behave.
+So we should modify the quantity method to always return string (to_s for the number) instead of sending to_s to the results.
+Next: replace bottles with container in the 0 case. Now the first lines of 2 branches are the same.
+
+## 4.7. Taking Bigger Steps
+It's beginning to feel that there's a common refactoring pattern.
+If this theory is corrent, it makes sense to combine several steps to speed up.
+Let's examine the second lines of the remaining branches.
+Replace the corresponding strings with the calls to quantity and container.
+Lines 1 and 2 are now identical.
+The next difference: 
+lines 3 are very different, but they represent a single concept.
+We must name a concept, create a method to represent it and replace the strings with a message send.
+The concept is an action to take depending on the number of bottles.
+We can do it in smallest steps or combine them.
+If we take bigger steps, we'll create an action method.
+Then replace 3rd lines with action message send.
+
+Combining steps now is different from previous container method creation, cause now you've practiced the Flocking Rules. Now it makes sense to take bigger steps.
+But if you combine steps and the tests fail, first return to green and make incremental changes.
+
+## 4.8. Discovering Deeper Abstractions
+There is only 1 difference left now - the 4th lines, let's resolve it.
+'bottles' is the same as container, so we need to resolve '99' vs qunatity difference.
+We may want to alter quantity method and replace if with a case statement.
+But smth is deeply wrong eith this solution:
+-1 is invalid number of beers.
+Questions:
+- what is the responsibility of the quantity method?
+- is there a way to make 4-th phrases more alike or identical?
+
+99 is not a special case of quantity concept.
+You can replace the lines more alike by replacing 99 with quantity(99)
+Replace 'bottles' with a call to container method.
+'99' must represent the same concept ad number-1.
+The concept should know that when the number is 50, result is 49 and when the number is 0, the result is 99.
+There are #succ and #pred methods in ruby (4.succ => 5, 'b'.pred => 'a', etc)
+In our case the main direction is down, expect the verse 0 case, which is followed by 99.
+The term successor is right, here it means following, not higher.
+First successor implementation:
+'''
+def successor(number)
+  number - 1
+end
+'''
+Next:
+- replace number-1 with successor in the else branch
+- make successor open to be used with 0, add if statement
+- replace 99 with successor
+
+The 0 and else cases are now identical.
+
+Successor is important and separating it from quantity gives both methods a single responsibility.
+
+## 4.9. Depending on Abstractions
+
+Abstractions are benefitial in many ways: consolidating code, so it becomes a shortcut for an idea, the code can be changed with ease.
+Another subtle benefit: they tell where code relies upon an idea. To get this benefit you must refer to an abstraction in every place where it applies.
+E.g. container(number-1). This code doesn't actually want the container of number-1, it wants the container for a following verse.
+You should replace all occurencies of number-1 with successor(number).
+One more refactoring trick to prove that this common template work for all changes:
+Add the whole verse text to the end of the method whithout removing case statements.
+Now we can remove the case statement.
+It's important to ask yourself if the new code is better.
+The Flog score is worse, but the code is better.
+The new concepts are revealed and isolated in the new code.
+If several programmers follow the Flocking Rules, their resulting code will be the same.
+
+# 5. Separating Responsibilities
 
 
-
-4 - 122-170
 5 - 170-222
 6 - 222-280
+
+
+
+
+
+
+
+
