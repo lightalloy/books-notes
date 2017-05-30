@@ -504,15 +504,116 @@ The new concepts are revealed and isolated in the new code.
 If several programmers follow the Flocking Rules, their resulting code will be the same.
 
 # 5. Separating Responsibilities
+The impetus of our refactoring was the nex 'six-pack' requirement.
+
+## 5.1. Selecting the Target Code Smell
+Code should be opened for extension and closed for modification.
+Let's reexamine the current code and find if it's open for the new requirement.
+A code is not yet open for it.
+The truth about refactoring is that sometimes it makes things worse.
+Proper refactoring allowes you to explore a problem domain safely.
+We've done the refactoring, but the code is not yet open. Now we must decide whether it's better to proceed with additional modifications or revert to the previous state and try one more time.
+
+The current code is not open but it's improved, so let's keep it.
+You must continue to be guided by code smells.
+
+### 5.1.1. Identifying Patterns in Code
+### 5.1.1. Spotting Common Qualities
+### 5.1.3. Enumerating Flocked Method Commonalities
+Questions to ask:
+#### Do any methods have the same shape?
+  The Flocked Five methods are all of the same shape.
+  It’s not yet clear what it means that these methods have the same shape, but it’s important to notice that they do.
+##### Squint Test - one easy way to judge the code.
+- put the code of interest on the screen
+- lean back
+- squint your eyes, such as you can still see the code, but can no longer read it or zoom out.
+- look for the changes in shape and in color
+Changes of shape reveal the presence of conditionals. Two or more levels of indentation result in multiple execution paths and add complexity.
+Changes of color indicate differences in the level of abstraction. A method that mixes many colors tells a story that may be difficult to follow.
+
+#### Do any methods have the arguments of same shape?
+6 methods take the same argument - the Flocking Five and the verse method.
+
+#### Do arguments of the same name always  mean the same thing?
+Verse method - number represents the verse number.
+Number in the Flocking Five method is a bottle number.
+These methods (verse vs five) use the same argument name to represent different concepts.
+This is rarely a good idea.
+The naming mistakes make it harder to notice underlying code smells, now you must examine the arguments and clarify the abstractions they represent (verse number - for the verse, bottle number - for the flocking five methods)
+
+#### Where would you put the private keyword in this class?
+Before the flocking five
+
+#### How would you break the class into 2 pieces?
+Same
+
+For the Flocking Five methods (container, quantity, action, pronoun and successor):
+#### Do the tests in the conditionals have anything in common?
+Thy all test that number is exactly equal to another value.
+
+#### How many branches do conditionals have?
+2
+
+#### Do the methods contain any code rather than the conditionals?
+No.
+
+#### Do methods that take number as an argument depend more on number or more on a class as a whole?
+The flocked five depend only on the number argument rather than on the rest of the class.
+
+### 5.1.4. Insisting Upon Messages
+The flocking five method are flawed from the point of view of the OO practitioner.
+This solution is optimized to understandability instead of changeability.
+The above pattern means that objects are missing.
+
+If you see the conditional, be suspicious.
+Conditionals are useful in OOP apps. Manageable OO applications consist of pools of small objects that collaborate to accomplish tasks. E.g. some object, somewhere, must choose which objects to create, and this    often requires conditionals.
+
+There’s a big difference between a conditional that selects the correct object and one that supplies behavior. The first is acceptable and unavoidable. The second suggests that you are missing objects in your domain.
+
+To preserve code ignorance, minimizing dependencies is required. The container methods yearns to be injected with a smarter object to which it could forward the message:
+
+'''
+def container
+  smarter_number.container
+end
+'''
+
+## 5.2. Extracting Classes
+A number of methods take the same argument, have the same shape, contain a conditional, could be private and depend more on argument than on the class as a whole.
+These are traits that point on a Primitive Obsession code smell. 
+Built-in data classes like String, Integer, Array , and Hash are examples of "primitives."
+The cure for Primitive Obsession is to create a new class to use in place of the primitive.
+The refactoring recipe is Extract Class.
+
+### 5.2.1. Modeling Abstractions
+You must now choose a name for a new class.
+The primitive you are replacing represents a bottle number.
+Not a bottle (physical), but a bottle number (idea).
+The power of OO is that you create a virtual world, in which ideas (e.g. Purchase, Discount, etc) are real.
+Don't focus on physical things only when designing an app.
+
+Name of our class: there are two most obvious choices - ContainerNumber and BottleNumber.
+
+### 5.2.2. Naming Classes
+The rule is: name methods one level of abstraction higher than current implementation.
+If we extrapolate this rule to classes, the name should be ContainerNumber.
+But the name BottleNumber is good enough.
+BottleNumber - less flexible, straightforward. ContainerNumber - more abstract. 
+That rule applies more to numbers than to classes.
+The classes must be named after the name they are, you can revisit this desicion if things change later.
+
+### 5.2.3. Extracting BottleNumber
 
 
-5 - 170-222
+
+ 
+
+5 - (185)-222
 6 - 222-280
 
 
-
-
-
+- write out flocking rules and some refactoring algorythms
 
 
 
