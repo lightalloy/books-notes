@@ -604,16 +604,128 @@ That rule applies more to numbers than to classes.
 The classes must be named after the name they are, you can revisit this desicion if things change later.
 
 ### 5.2.3. Extracting BottleNumber
+This chapter extracts a new class BottleNumber without using TDD but following a modified Martin Fowler Extract File refactoring recipe.
+The Bottles tests will be a safety net for the new class. They'll be a kind of integration tests (indirectly test BottleNumber).
+
+Four steps will stull apply:
+- parse the new code
+- parse and execute
+- parse, execute and use its result
+- delete unused code
+
+First step: create an empty BottleNumber class.
+Next: copy the flocking five to the BottleNumber.
+
+Running the tests at this point just parses the code and checks that it's syntactically correct.
+Official 'Extract Class' recipe: linking the old class to the new, move attributes, then methods of interest.
+We'll combine all of the steps moves in a single change.
+That's a large leap, but you can be confident, the code is consistent.
+
+Add attr_reader :number to the BottleNumber and an initialize method
+Next step is to execute a bit of the new code without using the result:
+Add:
+'''
+BottleNumber.new(number).container(number)
+'''
+to the beginning of the container method of the Bottles class.
+The code is ugly - it requires passing the number argument twice, we'll improve it later.
+Next small step: use the result of the new method, move the code from the beginning to the end of the Bottles container method.
+Now you can delete the old implementation.
+Repeat the above procedure for each of the methods.
+
+### 5.2.4. Removing Arguments
+You could just remove the argument and modify the caller, but that would be a multiline change.
+In real world application the method is called in many places, so that wouldn't be a simple change.
+Let's rename the argument and add the default:
+'''
+def container(delete_me=nil)
+...
+end
+'''
+Now the argument is optional and you can remove the redundant argument from the caller.
+After the call is modified you can remove delete_me argument.
+The steps:
+- change argument to delete_me = nil arg
+- change every sender to remove the parameter
+- delete the argument from the method definition
+
+### 5.2.5. Trusting the Process
+Removing the argument by these steps work with action, quantity and action.
+But for pronoun tests begin to fail.
+There is a call to pronoun in the action method.
+In the step 2 we should remove the number argument from the action method.
+Once you do this and follow all steps, the tests will pass.
+
+If tests begin to fail during refactoring, take a closer look at the code.
+
+## 5.3. Appreciating Immutability
+To mutate means to change.
+In physical world conditions vary over time.
+Most OO programmers write code that expects and relies upon object mutation.
+That feels natural, but mutation is not an absolute requirement. It's possible to build apps creating only immutable objects.
+Concerns: performance.
+Benefits: 
+- easy to understand and reason about, won't secretly morph into something else.
+- thread safe
+
+## 5.4. Assuming Fast Enough
+The benefits of immutability are so great that if it was free, you would choose it every time.
+You should become reconciled to the idea and you may require creation of many new objects.
+It's time to discuss caching.
+Caching is easy, but finding out when cache should be updated can be hard.
+Costs of caching and mutation are interrelated: if a thing doesn't mutate, the local copy is good forever.
+If the thing changes, you must write additional code to recognize if your copy is stale.
+Outdated cache can be a source of frustrating bugs.
+Mutation and caching complicate code, sometimes complication is required for performance improvement, sometimes not.
+The best strategy is to write the simplest code and measure its performance.
+The goal is optimize for ease of understanding while maintaining acceptable performance.
+
+## 5.5. Creating BottleNumbers
+Even if you are comfortable with object creation, the code construct a large amount of BottleNumbers. 900 instances are created for 100 verses.
+That feels excessive.
+All of the methods creating BottleNumbers are called from the verse method.
+We can cache the instance of BottleNumber for the whole verse or some lines of it, or even for the whole song, but it's not free.
+
+Caching:
+- create a variable in the beginning of the verse (that's a temporary variable code smell)
+'''
+bottle_number = BottleNumber.new(number)
+'''
+The complexity is not raised much, the benefits outweight the costs.
+- gradually alter the verse template to send messages to the new object
+
+Now only the phrase four (with successors) remains to be updated.
+
+## 5.6. Recognizing Liskov Violations
+
+The goal is to replace
+'''
+quantity(successor(number))
+'''
+with something like
+'''
+bottle_number.successor.quantity
+'''
+The problem is that successor returns the number, though it should logically return a BottleNumber.
+This inconsistency is another violation of Liskov Substition Principle.
+It's better to finish horizontal refactoring for now before fixing the Liskov violation.
+
+For now you can create another temp variable next_bottle_number and use it in the last phrase.
+'''
+next_bottle_number = BottleNumber.new(bottle_number.successor)
+'''
+
+The code still exudes code smells (duplication, conditionals, temp fields, etc) and violates LSP.
+But this code is consistent and regular, embodies a stable point and enables the next refactoring.
+
+# 6. Acheiving Openness
 
 
-
- 
-
-5 - (185)-222
+5 - (214)-222
 6 - 222-280
 
 
-- write out flocking rules and some refactoring algorythms
+- write out flocking rules and some refactoring algorithms
 
 
 
