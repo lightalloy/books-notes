@@ -108,10 +108,10 @@ It may have methods: verse(n), verses(a, b), song
 
 It makes sense to begin by testing a single verse.
 TDD tells you to write the simplest code that will pass this test. So we write just enough code to change the error message.
-'''
+```ruby
 class Bottles
 end
-'''
+```
 Next steps:
 - add an empty method 'verse'.
 - add an argument (_)
@@ -136,19 +136,19 @@ Verses 0,1,2 are unique. It makes sense to test the verse 2.
 - failure
 - possibilities:
 *new conditional:
-'''
+```ruby
 if number == 2
 ...
 else
 ...
 end
-'''
+```
 *interpolated string:
-'''
+```ruby
 ...
 "#{number-1} bottle#{'s' unless  (number-1)  ==  1}  of  beer"+
                            "on the wall.\n"
-'''
+```
 
 Choice by metrics: interpolated string, but metrics are wrong - can't find 'unless' conditional.
 
@@ -179,11 +179,11 @@ Creating a test for verses 88 and 89.
 Duplication is useful when it supplies independent, specific examples of a
 general concept that you don’t yet understand.
 But here it's not useful - it would duplicate already existing example.
-'''
+```ruby
 def verses(_,_)
 verse(99)+"\n"+verse(98)
 end
-'''
+```
 There are different ways to make tests pass:
 - Fake It (till you make it)
 - Obvious Implementation
@@ -344,7 +344,7 @@ Real applications can have similar probles but with 10-100-1000 callers instead 
 ### 3.7.5. Refactoring Gradually
 A strategy not to edit all callers simultaniously:
 Container With Defaulted Argument:
-'''
+```ruby
 def container(number=:FIXME)
   if number == 1
     'bottle'
@@ -352,7 +352,7 @@ def container(number=:FIXME)
     'bottles'
   end
 end
-'''
+```
 Once the refactor is complete, the default should be removed.
 Note, that this change is multiline, but it could be represented in single a line form.
 For now we'll keep it this way.
@@ -475,11 +475,11 @@ There are #succ and #pred methods in ruby (4.succ => 5, 'b'.pred => 'a', etc)
 In our case the main direction is down, expect the verse 0 case, which is followed by 99.
 The term successor is right, here it means following, not higher.
 First successor implementation:
-'''
+```ruby
 def successor(number)
   number - 1
 end
-'''
+```
 Next:
 - replace number-1 with successor in the else branch
 - make successor open to be used with 0, add if statement
@@ -572,12 +572,11 @@ Conditionals are useful in OOP apps. Manageable OO applications consist of pools
 There’s a big difference between a conditional that selects the correct object and one that supplies behavior. The first is acceptable and unavoidable. The second suggests that you are missing objects in your domain.
 
 To preserve code ignorance, minimizing dependencies is required. The container methods yearns to be injected with a smarter object to which it could forward the message:
-
-'''
+```ruby
 def container
   smarter_number.container
 end
-'''
+```
 
 ## 5.2. Extracting Classes
 A number of methods take the same argument, have the same shape, contain a conditional, could be private and depend more on argument than on the class as a whole.
@@ -624,9 +623,9 @@ That's a large leap, but you can be confident, the code is consistent.
 Add attr_reader :number to the BottleNumber and an initialize method
 Next step is to execute a bit of the new code without using the result:
 Add:
-'''
+```ruby
 BottleNumber.new(number).container(number)
-'''
+```
 to the beginning of the container method of the Bottles class.
 The code is ugly - it requires passing the number argument twice, we'll improve it later.
 Next small step: use the result of the new method, move the code from the beginning to the end of the Bottles container method.
@@ -637,11 +636,11 @@ Repeat the above procedure for each of the methods.
 You could just remove the argument and modify the caller, but that would be a multiline change.
 In real world application the method is called in many places, so that wouldn't be a simple change.
 Let's rename the argument and add the default:
-'''
+```ruby
 def container(delete_me=nil)
 ...
 end
-'''
+```
 Now the argument is optional and you can remove the redundant argument from the caller.
 After the call is modified you can remove delete_me argument.
 The steps:
@@ -688,9 +687,9 @@ We can cache the instance of BottleNumber for the whole verse or some lines of i
 
 Caching:
 - create a variable in the beginning of the verse (that's a temporary variable code smell)
-'''
+```ruby
 bottle_number = BottleNumber.new(number)
-'''
+```
 The complexity is not raised much, the benefits outweight the costs.
 - gradually alter the verse template to send messages to the new object
 
@@ -699,33 +698,272 @@ Now only the phrase four (with successors) remains to be updated.
 ## 5.6. Recognizing Liskov Violations
 
 The goal is to replace
-'''
+```ruby
 quantity(successor(number))
-'''
+```
 with something like
-'''
+```ruby
 bottle_number.successor.quantity
-'''
+```
 The problem is that successor returns the number, though it should logically return a BottleNumber.
 This inconsistency is another violation of Liskov Substition Principle.
 It's better to finish horizontal refactoring for now before fixing the Liskov violation.
 
 For now you can create another temp variable next_bottle_number and use it in the last phrase.
-'''
+```ruby
 next_bottle_number = BottleNumber.new(bottle_number.successor)
-'''
-
+```
 The code still exudes code smells (duplication, conditionals, temp fields, etc) and violates LSP.
 But this code is consistent and regular, embodies a stable point and enables the next refactoring.
 
 # 6. Acheiving Openness
+The code is still not open for six-pack refactoring.
 
+## 6.1. Consolidating Data Clumps
+The easiest code smell.
+quantity and container appear together in 3 different places.
+Having a clump of data usually means that you are missing a concept.
+Full-grown Data Clumps are usually removed by extracting a class.
+But for this small example it makes sense to simply create a new method.
 
-5 - (214)-222
-6 - 222-280
+All ruby objects know #to_s method. It's acceptable to override the default behavior.
+You can implement #to_s method in BottleNumber (wich returns quantity and container).
+The you can replace each occurence of quantity+container with just #{bottle_number}.
 
+Using to_s to remove this data clump reduces the amount of code, but comes close to abusing the intent of to_s.
+This to_s implementation is specific and may be ill-suited for use in other situations.
 
-- write out flocking rules and some refactoring algorithms
+In real life you need a more general implementation of to_s, but for now current implementation provides a great illustration of the value of clump removal
 
+The method is still not perfect, but removing the data clump improved readability and made its intentions more clear.
 
+## 6.2. Making Sense of Conditionals
+Next code smell: many conditionals of the same shape.
 
+Fowler offers several refactoring recipes:
+- replace conditional with state/strategy
+  Dispersing their branches into new smaller objects one of which is selected later and plugged back in at runtime. Using compositon.
+- replace conditional with polymorphism
+  Creating one class to hold the defaults of the conditionals (the false branches) and adding subclasses for each specialization (the true branches of the various conditions). It then chooses one of these new objects to plug back at runtime. Uses inheritance.
+
+Replace Conditionals with Polymorphism leads to the code arragement which is good for the six-pack requirement.
+Skilled programmers are good at picking code smells- that's result of a lifetime of coding experiments.
+But sometimes they also need careful, precise and reversible conding experiments.Polymorphism refers to the idea
+Practice builds intuition. Do it enough, and you’ll seem magical too.
+
+## 6.3. Replacing Conditionals with Polymorphism
+Polymorphism refers to the idea of having many different kinds of objects that respond to the same method.
+It allows senders to depend on the message while remaining ignorant of the type, class of the receiver.
+Senders don't care whare receivers are, but care what receivers do.
+
+### 6.3.1. Dismembering Conditionals
+BottleNumber's methods share a common shape, and they all contain checks for 0 and 1.
+That means that 0 and 1 are special and need to be smarter.
+Primitive Obsessions are usually cured by extracting a class.
+
+Each conditional provides specific behavior in the true branch and generalized behavior in its false.
+
+For the transition you'll need to create separate classes for the logic of 0 and the logic of 1, and some additional code to choose the correct class based on the value of number.
+
+To begin choose one of the values: 0. Next, decide the name of the class: BottleNumber0.
+Create BottleNumber0 as an empty subclass of BottleNumber.
+
+Modern OOP is biased towards inheritance, but that doesn't mean that inheritance is banned.
+
+- copy(not cut) one of the methods from BottleNumber to BottleNumber0, e.g. quantity.
+- remove the part of the BottleNumber0 method, that isn't about 0
+
+Current verse implemetation is tightly coupled to the BottleNumber class.
+One way to find out if you need BottleNumber or BottleNumber0 is like this:
+```ruby
+bottle_number = (number == 0 ? BottleNumber0 : BottleNumber).new(number)
+```
+It works, but is not optimal.
+
+### 6.3.2. Manufacturing Objects
+When several classes play a common role, some code, somewhere, must know how to choose the right role-playing class.
+This choosing very often involves a conditional, which should exist in one and only one place.
+Code like this 'manufactires' an instance of the right kind of object and is often referred as a factory.
+
+The factory's sole responsibility is creating objects to play the role, to isolate the names of specific classes, to hide the logic needed to choose the correct one.
+
+Now you need a bottle number factory.
+The first step is to isolate the creation of BottleNumbers in a single method of Bottles.
+```ruby
+def bottle_number_for(number)
+  BottleNumber.new(number)
+end
+```
+Next - replace BottleNumber.new in the verse method with bottle_number_for.
+
+Change the bottle_number_for to return BottleNumber0 or BottleNumber depending on the number.
+Now you can remove everything but the default (false) branch for BottleNumber's quantity method.
+
+The next goal was to reduce the subclass' conditional to its true branch, and the superclass' to its false.
+
+BottleNumber and BottleNumber0 classes are substitutable for each other.
+To use the factory you don't need to know the class of the resulting object.
+
+### 6.3.3. Prevailing with Polymorphism
+Recipe's steps:
+
+1) Create a subclass to stand in for the value upon which you switch.
+  a) Copy one method that switches on that value into the subclass.
+  b) In the subclass, remove everything but the true branch of the conditional.
+     i) Create a factory if it does not yet exist, and
+     ii) Add this subclass to the factory if not yet included.
+  c) In the superclass, remove everything but the false branch of the conditional.
+  d) Repeat steps a-c until all methods that switch on the value are dispersed.
+2) Iterate until a subclass exists for every different value upon which you switch.
+
+Follow those steps for action and successor methods.
+
+The next step is repeating the entire procedure for 1.
+Then choose a method that is obsessed by 1 and copy it to the subclass.
+E.g. container method.
+As currently written the factory must be updated every time the new bottle number class gets created.
+For now you need to add a case statement to the factory method.
+
+Add it and continue for all methods, that obsess on 1.
+
+Despite the problem with the successor, the overall code fairly accurately reflects the domain.
+
+### 6.3.4. Making Peace With Conditionals
+The current factory contains a conditional which is similar to the Shameless Green conditional.
+But the Shameless Green had a branch for the verse #2, the current solution does not.
+Verse 2 is special, but bottle number 2 is not.
+The Shameless Green knows exactly what to do, the factory does not - it know how to choose who does.
+We've moved from procedural to OO code.
+The hard truth is that you can't avoid conditionals. But you can confine conditionals to factories and use polymorphism to create a pluggable behavior.
+
+## 6.4. Transitioning Between Types
+The successor method violates the Liskov Substitution Principle.
+It may cause increasing harm, each place where you call successor will have to know that it returns an Integer.
+When it was first created, there was no violation, it appeared when we transfered successor to the BottleNumber class.
+Now the problem is even worse, cause there are 2 successor methods: in BottleNumber0 and BottleNumber1.
+Needed alterations:
+- the factory should be reachable by the successor method
+- the successor method should invoke the factory
+- the verse method should expect successor to return a bottle number
+
+It's reasonable to put the factory into the BottleNumber class and simplify the method name, bottle_number_for would be redundant.
+```ruby
+class BottleNumber
+  def self.for(number)
+  ...
+  end
+end
+```
+For now the factory will have to handle both types (Integer and BottleNumber) cause you can't modify all callers at one time:
+```ruby
+def self.for(number)
+  return number if number.kind_of(BottleNumber)
+  ...
+end
+```
+Replace bottle_number_for in the verse method with BottleNumber.for .
+bottle_number_for in Bottles is obsolete and can be deleted.
+Next: change the successor method in BottleNumber0:
+```ruby
+def successor
+  BottleNumber.for(99)
+end
+```
+same for BottleNumber#successor.
+
+Now we want to replace next_bottle_number initialization in #verse with:
+```ruby
+next_bottle_number = bottle_number.successor
+```
+For now, add this code after the previous initialization.
+Tests pass, you can confidently delete the old line.
+
+Now the variable next_bottle_number is used only in one place.
+Temporary variables used just once may be removed by Inline Temp refactoring.
+
+The guard clause in the factory is obsolete and can be removed.
+
+Correcting the Liskov violation is important because OO programming relies on explicit trust and implicit contracts between objects.
+
+Trustworthy objects are joy to work with, cause they behave as you expect.
+If you can't trust objects, they need to know too much about each other, it usually leads to lots of conditionals and type checking.
+
+## 6.5 Making the Easy Change
+You can now create a class for bottle number #6, that will return a six-pack.
+It's time to switch back to TDD mode.
+The factory is not open and must be updated to handle BottleNumber6.
+Steps:
+- change the test to print '1 six-pack' when needed
+- create a class BottleNumber6 with the corresponding container method
+- add a 6-branch to a case statement in the factory
+- create the BottleNumber6#quantity method
+
+> Make the change easy (warning: this may be hard), then make the easy change
+
+Kent Beck
+Most of this book has been concerned with making the change easy.
+
+## 6.6. Defending the Domain
+Instead of implementing quantity and container for BottleNumber6 we could just override the #to_s method.
+
+```ruby
+def to_s
+  '1 six-pack'
+end
+```
+It's shorter, but not better. Quantity and container represent reflect the fundamental concepts in this domain.
+BottleNumbers are now independent objects and can be used in other contexts.
+Overriding #to_s directly corrupts the BottleNumber6 with the knowledge of the inner Bottles verse template. This implementation couples BottleNumber6 to the context.
+
+## 6.7. Prying Open the Factory
+There are 3 conditionals in the factory method.
+Let's see if it's possible to create a factory open for an extension.
+Using metaprogramming to create an Open Factory:
+```ruby
+class BottleNumber
+  def self.for(number)
+    begin
+      const_get("BottleNumber#{number}")
+    rescue NameError
+      BottleNumber
+    end.new(number)
+  end
+end
+```
+The factory is open, but there are some disadvantages:
+- the code is harder to understand
+- BottleNumber0, etc classes are not explicitly referenced in the source code
+E.g. the code will be in danger of deleting during the cleanup zeal
+- the code uses an exception for flow control
+- the factory ignores bottle number classes whose names do not follow the convention
+
+It depends what option to choose: it depends.
+If you create new bottle number classes often, the cost of changing the factory method may be bigger than the cost of making it open.
+If you never create new bottle classes, there is not justification for complicating the code.
+A factory’s fundamental job is to manufacture the correct player of a role and it's openness can be tweaked over time.
+
+# Afterword
+
+Goals of the book:
+1) Process: supply you techniqies to improve your code:
+Strive for simplicity.
+Don’t abstract too soon.
+Focus on smells.
+Concentrate on difference.
+Take small steps.
+Follow the Flocking Rules.
+Refactor under green.
+Fix the easy problems first.
+Work horizontally.
+Seek stable landing points.
+Be disciplined.
+Don’t chase the shinything.
+New requirement: first refactor, then write the new code.
+
+2) The book wants you to fall in love with polymorphism.
+
+The secret to programming happiness is to combine the canons with the infection, building applications from polymorphic, trustworthy objects, and changing them one step at a time.
+
+Hold high standards, but judge yourself gently.
+Think of your code as a message in a bottle, written in haste for future
+readers. Your job is not to be  perfect, but to write a generous and sympathetic story.
