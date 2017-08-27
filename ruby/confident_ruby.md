@@ -687,7 +687,7 @@ class GuestUser
   def initialize(session)
     @session = session
   end
-  
+
   def name
     'Anonymous'
   end
@@ -695,7 +695,7 @@ class GuestUser
   def authenticated?
     false
   end
-  
+
   def cart
     SessionCart.new(@session)
   end

@@ -801,7 +801,7 @@ Intentions of testing:
 - supplying documentation
 - deferring design decisions
 - supporting abstractions
-- exposing design flaws 
+- exposing design flaws
   if testing is hard, design is bad
   write loosely coupled tests about only the things that matter
 ### Knowing what to test
