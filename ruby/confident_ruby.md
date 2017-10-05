@@ -995,7 +995,7 @@ class PointBuilder < SimpleDelegator
   def fuzzy_radius=(fuzzy_radius)
     __setobj__(FuzzyPoint.new(point, fuzzy_radius))
   end
- 
+
   def point
     __getobj__
   end
