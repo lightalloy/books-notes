@@ -1303,7 +1303,7 @@ That trick is used in VCR gem and in some rails code (though replaced with the n
 # Part 2. Metaprogramming in Rails
 ### Active Support’s Concern Module
 #### The Include-and-Extend Trick
-Rails before concerns - 'include-and-extend trick' (linke in the VCR example)
+Rails before concerns - 'include-and-extend trick' (link in the VCR example)
 This trick has some problems:
 
 Each module that defines class methods must also define a similar included hook that extend s its includer.
