@@ -1,4 +1,5 @@
 code/
 *.txt
+*.html
 poodr-notes/
 development/designing_data_intensive_apps.md
