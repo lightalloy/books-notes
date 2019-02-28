@@ -348,7 +348,7 @@ sleep
 ```
 
 ```bash
-ps -ho pid,state -p [pid of zombie process]
+ps -ho pid,state -p [pid of a zombie process]
 # => Z
 ```
 Any dead process whose status hasn't been waited on is a zombie process.
